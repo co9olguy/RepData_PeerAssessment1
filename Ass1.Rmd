@@ -1,0 +1,59 @@
+---
+title: "Reproducible Research: Peer Assessment 1"
+output: 
+  html_document:
+    keep_md: true
+---
+
+-----------------------------------------------------------------
+
+## Loading and preprocessing the data
+```{r}
+df <- read.csv("activity.csv", sep = ",", header = TRUE)
+#helpful time-formatting of intervals
+interval_times <- seq(from=as.POSIXct("00:00",format="%H:%M"), to=as.POSIXct("23:55",format="%H:%M"), by=60*5)
+```
+
+## What is mean total number of steps taken per day?
+```{r}
+#find total, mean, median
+total.steps <- tapply(df$steps, df$date, sum, na.rm = TRUE)
+mean.steps <- signif(mean(total.steps, na.rm=TRUE),6)
+med.steps <- median(total.steps, na.rm=TRUE)
+
+#plot
+hist(total.steps, xlab = "Daily number of steps", main = "Mean total number of steps taken per day", col ="HotPink")
+```
+
+- The mean number of total steps per day is `r mean.steps`.  
+- The median number of total steps per day is `r med.steps`.  
+
+## What is the average daily activity pattern?
+
+```{r}
+#find max interval
+avg.steps.in.interval <- tapply(df$steps, df$interval, mean, na.rm = TRUE)
+max.interval = which.max(avg.steps.in.interval)
+max.interval.name = names(max.interval)
+
+#plot
+plot(y=avg.steps.in.interval, x=interval_times, type="l", xlab = "Interval time", ylab = "Average steps in interval", main = "Average daily activity pattern")
+```
+
+- The 5-minute interval which contains the maximum average number of steps is the interval at `r max.interval.name`. 
+
+## Imputing missing values
+
+```{r}
+num.na <- sum(is.na(df$steps))
+```
+
+- The total number of missing values in the dataset is `r num.na`.
+
+We will replace these missing values using the mean for the 5-minute interval.
+
+```{r}
+new.df <- df
+```
+
+## Are there differences in activity patterns between weekdays and weekends?
